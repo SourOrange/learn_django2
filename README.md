@@ -25,7 +25,6 @@ DATABASES = {
 <pre>
 from django.db import models
 # Create your models here
-
 class Teacher(models.Model):
     # 每个类都继承 models.Model
     name = models.CharField(max_length=12)
