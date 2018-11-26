@@ -33,3 +33,13 @@ class Teacher(models.Model):
     course = models.CharField(max_length=20)
 </pre>
 嗯，就是这样先，以上的 name, age, address, course, 你想象为一个 excel 表中的，4个列名，另外 name, address, course, 是一个字符串，并且需要给限定多少字符，你想想，要是不做限制，那么万一别人写一本书的内容进去，你的程序会被挤爆的，也是不行的吧，所以要做限制。而 age 就不用。写到这里，我们还要想一下，既然和 数据库 打交道，那我们怎么让数据库知道，所以接下来，执行命令， <strong>python manage.py makemigrations</strong> ,会显示Create Model 'Teacher',并且生成一个 0001_initial.py 的文件夹，大概是这样, 这一步是告诉 数据库，请做好迁移的准备事项，我们要搬一些货进去了啊。第二步，执行命令 <strong>python manage.py migrate</strong> , 这一步就是真正的把数据填进去了，没出错的话会显示很多内容在命令行。
+
+----
+Teacher.objects.filter(age=18), 查找出年龄是18岁的所有实例，如果要是 大于或者小于呢， （age>18 或 age<18）则会报错。
+Teacher.objects.filter(age__gt=18) 这样才不会报错，具体的格式是 属性名 + 双下划线 + 字母 + = 值。
+通用的查找格式
+gt:大于 | gte:大于等于 | lt:小于 | lte:小于等于 | range:范围 | year:年份 | isnull:是否为空
+-----------
+ · 模糊查找：
+ · exact: 精确等于 | iexact: 不区分大小写 | contains: 包含 | startwith:以..开头 | endwith:以..结尾
+ 
