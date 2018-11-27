@@ -63,3 +63,56 @@ gt:大于 | gte:大于等于 | lt:小于 | lte:小于等于 | range:范围 | yea
  · 模糊查找：
  · exact: 精确等于 | iexact: 不区分大小写 | contains: 包含 | startwith:以..开头 | endwith:以..结尾
  
+## models 的关联
+- OneToOne (1 对 1)
+-- 可以想象一下，一个学校有一个校长
+- ManyToMany(多 对 多)
+-- 一个学校内有多名老师，老师们可能教的不止一个班级，所以有不同的学生
+- ManyToOne(多 对 一)
+-- 一个企业，有很多业务，腾讯，做了很多游戏。
+
+## OneToOne 的构建
+- 首先，我们来创建一个 1对1 的例子，当然了，这是在 models中创建的两个类，首先创建两个类
+<pre>
+class School(models.Model):
+    '''和Manager类 进行一比一的关系'''
+    school_id = models.IntegerField()
+    school_name = models.CharField(max_length=20)
+
+    # 如果在 School 中创建 1对1 ，那就是这么写
+    # my_manager = models.OneToOneField(Manager)
+
+    def __str__(self):
+        return self.school_name
+
+
+class Manager(models.Model):
+    manager_id = models.IntegerField()
+    manager_name = models.CharField(max_length=20)
+
+    # 可以在School中创建也可以在Manager中创建 1对1 的关系
+    my_school = models.OneToOneField(School)
+
+    def __str__(self):
+        return self.manager_name
+</pre>
+
+- 接着是执行两个命令，python manage.py makemigrations , python manage.py migrate 
+- 创建数据并保存到数据库中，还记得我们第一次创建 Teacher 中的实例吗，我们首先是 t1 = Teacher() 最后 t1.save(), 是啊，这是一种方法，当然了，我们还有另外一种方法，直接一条命令解决， t1 = Teacher.objects.create(name="..", age=..), 这条命令会自动保存，无需我们额外的写 save(), 所以，我们接下来是启动 python manage.py shell 后，导入 from teacher.models import School, Manager  ,记住，我们暂时不需要导入 Teacher, 好了，和以前一样，一开始我们尝试看看有什么, School.objects.all() 或者 Manager.objects.all(), 你会发现为空的，那么我们为了实验，创建2个学校2个校长，分别11对应。
+- s1 = School.objects.create(school_id=22, school_name="BeiDaUniversity")
+- s2 = School.objects.create(school_id=58, school_name="ShenZhenUniversity")
+好了，再次 School.objects.all(),你会发现存了两个学校，当然你可以试试 s1.school_id ，s2.school.name 的访问，我们再来创建校长
+- m1 = Manager.objects.create(manager_id=35, manager_name="Beida", my_school=s1) # 注意，最后一个属性 my_school, 值对应的是 s1,也就是北大学院，当然这是1对1的，所以你想好了，要对应哪个再填上去。
+- m2 = Manager.objects.create(manager_id=66, manager_name="Shenzhen", my_school=s2)
+## 建议，对于创建实例的方法，我们推荐 用  ..objects.create(...) 
+
+继续啦，当你创建完上面的 s1 s2 m1 m2 之后，我们来查找一下，肯定啊，要查某个学校的校长是谁，或者是校长叫做什么的，他的学校叫什么，所以就有从子表查母表的，或者母表查子表，上面的两个类中， Manger 类是子表，因为他里面有一句对应School，所以就是子表，
+Manager.objects.ger(manager_name="Shenzhen").my_school.school_name, 这是一句子表查母表的，意思是 校长叫做shenzhen的学校的名字是？，实际上，你不需要去记住这句命令，因为你又多种方法去实现查询，你会熟悉的，你还可以使用 m2.my_school.school_name 查到学校名。。。
+而，母表查子表也是一样的，有一种方法和上面的一样，School.objects.get(manager__manager_name="Beida"), 这是母表查子表，里面的格式是:
+母表类.objects.get(子表类名__子表属性名="") ,记住是双下划线。当然了，不需要去这么记住，直接用 s1.子类名.manager_name ,就可以查到 s1学校的校长是谁了。(s1.manager.manager_name) 是吧，不难，就是大概那些方法，试试就行了。
+
+## 如何修改属性的值
+你还记得把，学校的名字是 拼音组成的，s1.school_name = "BeiDaUniversity", 如果我们在后面要修改，那么可以直接 s1.school_name = "北京大学"，s1.save() 注意，一定要记得save,不然绝对不行，虽然不会报错，但是最终依旧是 拼音的，单独一个一个修改，可以这么做。不过，如果要修改多个的话，并且，修改为一样的名，可以使用 update() 方法，也就是 School.objects.update(school_name="北京大学")， 如果你这么做了，两个学校都是 北京大学了。所以看你情况而定吧。当然了，现在是两个学校，要修改很容易，所以你可以把两个都改为北京大学，然后再 运用第一个修改的方法，利用 s1.school_name s1.save() 的方法去修改第二个学校为原来的学校名
+
+## delete
+    直接删除吧。
