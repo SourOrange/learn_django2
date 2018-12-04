@@ -116,3 +116,30 @@ Manager.objects.ger(manager_name="Shenzhen").my_school.school_name, 这是一句
 
 ## delete
     直接删除吧。
+## 一对多的关系 ForeignKey
+是啊，就是 ForeignKey ，而不是什么OneToManyField, 当然你也可以直接把后者记住为 ForeignKey 就行了，我们这里举一个例子，学校里有多个场地，有篮球场
+足球场，羽毛球场，这时候，我们定义一个场子先吧。再思考一下这个关系要加在哪里
+<pre>
+class Playground(models.Model):
+    playground_name = models.CharField(max_length=20)
+    # 因为是多个场地，所以在多的一边定义
+    my_school = models.ForeignKey(School)
+    def __str__(self):
+        return self.playground_name
+       
+</pre>
+是啊，就是在多的一方定义，思考一下，我们总是要查这个场地属于哪个学校的，哪个场地又是属于哪个学校的，所以就可以把 字段定义为 将来要方便查找的 my_school, 或者其他你可以关联到学校的，然后 用 ForeignKey(对应的一方)。当然了，这么做后，你记得去 迁移一下先，毕竟你添加了一个 Playground 表，记住用那两条命令。接着去 shell 中添加实例吧。p1 = Playground.objects.create(playground_name="篮球场", my_school=s1), 这样就创建完毕了，注意一下，s1 代表了 School 中的一个例子。并且在School 中会多一个默认的没有显示出来的字段名，playground_set, 也就是所有场地的集合，方便你通过学校去查询所有的场地。现在你可以通过场子查询到属于哪个学校了， p1.my_school 就可以查询到。反过来通过学校就是 s1.playground_set.all() 查找学校的所有场地。当然了，你要是找其中的名字叫做足球场的也行，s1.playground_set.all().filter(playground_name="足球场") 这样就行了。至于删除的，实际上，就是 delete,某课程中没有具体说明，所以这个大家私底下去学吧，加油！！！
+
+## 多对多 ManyToManyField
+这次就是 多对多的 关系了，多对多 写在哪边都可以。并且写一个就行，不需要两边都写，比如有 老师和学生 就是多对多的关系，老师有多个学生，学生有多个老师。
+所以在某一边写就行了。我们在前面已经写过了 老师，现在我们写学生类
+<pre>
+class Student(models.Model):
+    student_name = models.CharField(max_length=20)
+    # 我们在学生这边定义就行了，因为是有多个老师，所以最好用复数来区分
+    teacheres = models.ManyToManyField(Teacher)
+    
+    def __str__(self):
+        return self.student_name
+</pre>
+默认的，在老师类那边，也有一个 student_set, 依然是看不到的，但是在操作中可以使用来查询，现在还是记得要先 迁移，两个命令。再去 shell 往学生类中添加学生。 s1 = Student.objects.create(student_name="Jordan"), 记住，不需要往里面添加 teacheres,这个属性，重点是要怎么对应上，我们要把 s1 对应上某个老师，比如 t1, 那么我们要这么做 ， s1.teacheres.add(t1), 这样就成功添加了，然后你可以查一下 s1.teacheres.all() 看看所有的老师，因为我们只添加了一个，所以会显示 t1 的信息，接下去所有查询都是差不多的 s1.teacheres.all()[0].name 。通过老师查学生呢，就是 t1.student_set.all()。 基本上数据表的关系就是这样了。其中这只是简要的让大家看看熟悉一下，具体的内容，还是建议大家一定要去看官网的内容，毕竟有些人不靠谱，学习需要自己不断去探索。
