@@ -143,3 +143,13 @@ class Student(models.Model):
         return self.student_name
 </pre>
 默认的，在老师类那边，也有一个 student_set, 依然是看不到的，但是在操作中可以使用来查询，现在还是记得要先 迁移，两个命令。再去 shell 往学生类中添加学生。 s1 = Student.objects.create(student_name="Jordan"), 记住，不需要往里面添加 teacheres,这个属性，重点是要怎么对应上，我们要把 s1 对应上某个老师，比如 t1, 那么我们要这么做 ， s1.teacheres.add(t1), 这样就成功添加了，然后你可以查一下 s1.teacheres.all() 看看所有的老师，因为我们只添加了一个，所以会显示 t1 的信息，接下去所有查询都是差不多的 s1.teacheres.all()[0].name 。通过老师查学生呢，就是 t1.student_set.all()。 基本上数据表的关系就是这样了。其中这只是简要的让大家看看熟悉一下，具体的内容，还是建议大家一定要去看官网的内容，毕竟有些人不靠谱，学习需要自己不断去探索。
+
+
+## 上面的数据表之间的关联之后，我们讲讲 模板
+我记得在 learn_django 那个md中有讲过，至少是怎么配置模板的具体内容吧。这次主要是讲讲模板中的语法，实际上就是一些数据填空，但是有一些语法，不难，非常简单。不过说说配置先吧，好像有点忘记了。首先在你的项目中 settings.py 中，找到 template, 你的template应该是空的就像这样 template= ['DIR':[]].然后我们要这么做 'DIRS': [os.path.join(BASE_DIR, "templates")], 这里唯一有两点，BASE_DIR,是你的项目的具体目录地址，在该settings中，最上面就帮你写好了，我们不用改，直接写 BASE_DIR, 然后 “templates”, 是你要建立的文件夹的名字，后期中的模板都放在这里面，你也可以叫其他名字，但是一般，遵守约定，就叫templates, 好了。模板设置后，我们和前面的一样，不和数据库打交道，直接 是 url view template ，这三个步骤。
+这三个步骤，可以随便，但是你熟悉的话为前提。不然就是 先 url 再 view 最后 template.  那么继续。 先在 urls.py 中 继续写。 urlpatterns = [url(r'^one', tv.one)], 然后再 views.py 中写 一个 one 函数。
+<pre>
+def one(request):
+    return render(request, 'one.html')
+</pre>
+很明显，上面定义了一个 one.html, 所以我们在 templates 文件中建立一个 one.html. 简单，我们直接返回一个 h1 标题 hello my first tmp 就行。因为是测验。之后就是 debug run。在网页中输入  主机:8000/one 就可以看到内容了。
