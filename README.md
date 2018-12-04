@@ -153,3 +153,25 @@ def one(request):
     return render(request, 'one.html')
 </pre>
 很明显，上面定义了一个 one.html, 所以我们在 templates 文件中建立一个 one.html. 简单，我们直接返回一个 h1 标题 hello my first tmp 就行。因为是测验。之后就是 debug run。在网页中输入  主机:8000/one 就可以看到内容了。
+讲完了 第一个模板，我们讲讲第二个模板，这个模板带有一个变量 ，我们顶一个 url(r'^two', tv.two). 
+<pre>
+def two(request):
+    d = dict()
+    d['kuangjia'] = 'Django'
+    return render(request, 'two.html', context=d)
+</pre>
+接着建一个 two.html,随便一一个 h1 标签中写一句 I'm learning {{ kuangjia }} . 接着 主机:8000/two. 可以看到 I'm learning Django. 这是变量中的用法，当然了， 该标签你可以插入css的各种属性。
+第三个例子，是 for 标签，或者语法吧，也是一样，写一个 url(r'^three', tv.three), 
+<pre>
+def three(request):
+    s = dict()
+    s['score'] = [10, 23,44, 50, 33]
+    return render(request, 'three.html', context=s)
+</pre>
+然后， three.html, 
+<pre>
+{% for i in score %}
+    {{ i }}
+{% endfor %}
+</pre>
+这样就可以看到成绩了，主机:8000/three 。
