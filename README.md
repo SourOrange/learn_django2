@@ -175,3 +175,25 @@ def three(request):
 {% endfor %}
 </pre>
 这样就可以看到成绩了，主机:8000/three 。
+
+--
+还有一个例子是用 if 条件来判断的，网站中常用于表单的实例，就是如果是你登录了那么就给出页面，如果没有登录，就显示登录的表单给你填写，我们这里举例说说一个简单的判断用法。 url(r'^four', tv.four), 然后 views.py 中
+<pre>
+def four(request):
+    # 同样是传入一个字典
+    course = dict()
+    course['name'] = 'python'
+    return render(request, 'four.html', context=course)
+</pre>
+再来就是 templates 中，写第四个html
+<pre>
+<!--以下内容是在html中的 body 标签中-->
+{% if name == 'python' %}
+    I love {{ name }} 
+{% elif name == 'java' %}
+    I will learn {{ name }}
+{% else %}
+    I'm tired of {{ name }}
+{% endif %}
+</pre>
+由于是测试，上面的每一个执行语句，都可以放在一个标签里头。同样的还是在 主机：8000/four ，中调试，你可以试试是否正确执行了 I love python, 如果是，不妨在 views 中吧 name 的值改为 java 或者其他试试看。只不过要记住这是 if 的语法，和 for 是类似的，也需要一个 endfor 或者 endif 作为结束。
