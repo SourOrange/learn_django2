@@ -197,3 +197,36 @@ def four(request):
 {% endif %}
 </pre>
 由于是测试，上面的每一个执行语句，都可以放在一个标签里头。同样的还是在 主机：8000/four ，中调试，你可以试试是否正确执行了 I love python, 如果是，不妨在 views 中吧 name 的值改为 java 或者其他试试看。只不过要记住这是 if 的语法，和 for 是类似的，也需要一个 endfor 或者 endif 作为结束。
+
+第五个 ，实际上个人认为，这是一个更加正常的模板，毕竟大多数网站都需要你登录是吧，所以这个才是你需要掌握的，而前面四个html, 可以直接整合到这个有表单的html中，就算是一个大的集合，里面有表单，有判断，有for循环，有变量的填充。不过我们这里简单的做一个表单。之前我们说过 csrf_token 是跨站请求伪造 的，这个具体就是保护你的资料吧，别人在其他机器上就无法进行攻击了。简单说，我们这个 html 要在表单中添加 csrf_token ，防止被攻击。
+so, url(r'^five_get', tv.five_get), url(r'^five_post', tv.five_post), 然后 views.py 中写俩视图函数
+<pre>
+def five_get(request):
+    # 直接返回一个html页面
+    return render(request, 'five_get.html')
+    
+def five_post(request):
+    # 我们简单的返回一个提交信息后的页面
+    # 并且我们打印出 提交的 信息
+    print(request.POST)
+    return render(request, 'one.html')
+</pre>
+接着，我们在 templates文件中写一个 five_get.html。
+<pre>
+<!--csrf_token 跨站请求伪造 防止你修改其中的资料吧，
+        在表单中要添加的语句,下面的 five_post, 指的是主机名后为 five_post/-->
+    <form action="/five_post/" method="post">
+        {% csrf_token %}
+        姓名：<input type="text" placeholder="请输入您的大名" name="username">
+        <br>
+        密码：<input type="password" name="psw">
+        <br>
+        <input type="submit" value="提交">
+    </form>
+    <!--
+        如果你在页面中输入 用户名和密码，将显示如下信息
+        <QueryDict: {'username': ['sara'], 'psw': ['1708080']}>
+    -->
+</pre>
+请注意 表单中的  {% csrf_token %}, 如果不加这一句的话，你在调试的时候，应该在 settings.py 中，有个 middleware_classes = (...) 中，暂时把 .csrfviewmiddle. 很明显 csrf 的 class 给 注释掉先。如果你不注释，那么就一定要加上 {% csrf_token %} 在表单中。嗯
+<strong>基本上，以上几个模板，在一个html中就可以整合在一起，也就是出现在一起，就是这么简单。</strong>
