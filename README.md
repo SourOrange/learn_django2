@@ -230,3 +230,5 @@ def five_post(request):
 </pre>
 请注意 表单中的  {% csrf_token %}, 如果不加这一句的话，你在调试的时候，应该在 settings.py 中，有个 middleware_classes = (...) 中，暂时把 .csrfviewmiddle. 很明显 csrf 的 class 给 注释掉先。如果你不注释，那么就一定要加上 {% csrf_token %} 在表单中。嗯
 <strong>基本上，以上几个模板，在一个html中就可以整合在一起，也就是出现在一起，就是这么简单。</strong>
+
+# 接着讲了 session, Paginator, ListView, 这几样没什么具体例子，说了放在习题课里讲，walkthefvck......最后一节是 admin,详细说说 admin,就是管理后台的，一般在你 一开始创建一个项目的时候，你可以试试看 也就是 startproject, 和 startapp,(忘记是 startapp 还是 createapp)，反正这两个命令后，通常我们会去 127.0.0.1:8000 试试登录是否正常(显示 It worked) ，如果可以了，你在运行网址 127.0.0.1:8000/admin ,如果没猜错，会提示你一些错误信息，此时需要执行两个命令 , 第一个是 python manage.py makemigrations , （会显示没什么迁移的东西，不过还是需要执行的）第二个是 ， python manage.py migrate (显示创建了许多东西，对，刚才错误就是因为没这些东西)。 现在重新登录 admin ，就发现出现了 需要你登录的管理界面，就是这样了。
