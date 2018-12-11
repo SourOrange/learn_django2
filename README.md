@@ -232,3 +232,19 @@ def five_post(request):
 <strong>基本上，以上几个模板，在一个html中就可以整合在一起，也就是出现在一起，就是这么简单。</strong>
 
 # 接着讲了 session, Paginator, ListView, 这几样没什么具体例子，说了放在习题课里讲，walkthefvck......最后一节是 admin,详细说说 admin,就是管理后台的，一般在你 一开始创建一个项目的时候，你可以试试看 也就是 startproject, 和 startapp,(忘记是 startapp 还是 createapp)，反正这两个命令后，通常我们会去 127.0.0.1:8000 试试登录是否正常(显示 It worked) ，如果可以了，你在运行网址 127.0.0.1:8000/admin ,如果没猜错，会提示你一些错误信息，此时需要执行两个命令 , 第一个是 python manage.py makemigrations , （会显示没什么迁移的东西，不过还是需要执行的）第二个是 ， python manage.py migrate (显示创建了许多东西，对，刚才错误就是因为没这些东西)。 现在重新登录 admin ，就发现出现了 需要你登录的管理界面，就是这样了。
+
+现在就到了登录啦，你随便乱写些用户名和密码肯定报错的，所以我们要想进去，必须创建超级用户，言下之意就是创建一个管理员吧，里面的东西有你掌控。 python manage.py createsuperuser , 这条命令会让你输入 Username, password, email ，都是随便填就可以，当然你要记住了，可能会提示你密码过于简单或者小于8位数，所以你好好填密码，至于 email, 只要是你能想到的 格式的邮箱都行，不需要真实的邮箱。   另外，登录进去后，其实觉得是英文界面，你要想换为 中文，也行。在 settings.py 中，改这位 LANGUAGE_CODE = 'zh-Hans' 和 TIME_ZONE = 'Asia/Shanghai' ， 这样就行了。
+
+在你登录后，你只看到 group 和 user, group 是空的， user 是有1个，就是你创建的超级用户。当然了，我们要往这里添加数据，还记得我们在讲 数据库模型，那个章节的内容吗，就是创建了 Teacher，School，Manager，Playground，Student 这几个模型，请记住，如果你没有创建模型，请先创建，因为为了把数据库中的内容都插入到该页面中，所以你先创建几个 类(model), 再去 admin.py 中，注册这几个模型。没记错的话，这些 模型在 teacher.models 中，所以，在 admin.py 中，编辑内容。如下所示
+<pre>
+from django.contrib import admin
+
+from teacher.models import Teacher, School, Manager, Playground, Student
+# Register your models here.
+
+admin.site.register(Teacher)
+admin.site.register(School)
+admin.site.register(Manager)
+admin.site.register(Playground)
+admin.site.register(Student)
+</pre>
