@@ -248,3 +248,34 @@ admin.site.register(Manager)
 admin.site.register(Playground)
 admin.site.register(Student)
 </pre>
+记得在 那本叫做 python从入门到实践 的书中，就是这么做的，不过这里还有一种特别的，或者是更加方便的管理办法。就是为每个模型添加一个管理类，使得后期的管理（增删查改吧） 更方便。来试试看
+<pre>
+from django.contrib import admin
+
+from teacher.models import Teacher, School, Manager, Playground, Student
+# Register your models here.
+
+# 和上面的注册一样，只不过加上管理类
+class TeacherAdmin(admin.ModelAdmin):
+    pass
+    
+class SchoolAdmin(admin.ModelAdmin):
+    pass
+    
+class ManagerAdmin(admin.ModelAdmin):
+    pass
+    
+class PlaygroundAdmin(admin.ModelAdmin):
+    pass
+    
+class StudentAdmin(admin.ModelAdmin):
+    pass
+
+# 此处还需要把类名添加进去
+admin.site.register(Teacher, TeacherAdmin)
+admin.site.register(School, SchoolAdmin)
+admin.site.register(Manager, ManagerAdmin)
+admin.site.register(Playground, PlaygroundAdmin)
+admin.site.register(Student, StudentAdmin)
+
+</pre>
