@@ -279,3 +279,42 @@ admin.site.register(Playground, PlaygroundAdmin)
 admin.site.register(Student, StudentAdmin)
 
 </pre>
+还有一种方法是，像下面这么做的。
+<pre>
+from django.contrib import admin
+
+from teacher.models import Teacher, School, Manager, Playground, Student
+# Register your models here.
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    pass
+</pre>
+这两种方法都一样，不过个人觉得第一种方法容易记，随你啦。这里我们以 Teacher 类来做一个示范，假设你的 Teacher 模型中已经有了几个老师。那么看下面
+<pre>
+
+class TeacherAdmin(admin.ModelAdmin):
+    list_per_page = 2   # 修改每一页显示几个老师
+    actions_on_bottom = True    # 页面中 Action 那一栏 要放在底部或者顶部
+    actions_on_top = False      # 完全由你改变，或者不修改就在 顶部
+
+    list_display = ["name", "address", "curTime"]
+    
+    # 当然了，你需要查看Teacher的属性游戏有哪些
+    # 再决定要显示哪个
+    # 还可以将模型里面的函数(也叫方法) 作为列名来使用
+
+    # 还可以创建一个搜索框，就是要指定按照什么属性吧，进行搜索
+    search_fields = ["name"]
+    # 默认在你点击老师的时候，会出现四个字段，也就是属性 还有对应的值
+    # fields 可以让你只显示哪些字段, 以下的设置会把 course 字段隐藏掉
+    # fields = ["name", "age", "address"]
+
+    # 另外，这些字段，我们还可以作为一个分组，比如人物的基本信息和其他信息
+    fieldsets = (
+        ("基本信息", {"fields": ["name"]}),
+        ("其他信息", {"fields": ["age", "address", "course"]}),
+    )
+
+</pre>
+以上的这些 list_per_page, list_display ,都是每一个类中特有的，你不需要完全记住，但是你要知道这些能做修改就行了。
