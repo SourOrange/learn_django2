@@ -318,3 +318,7 @@ class TeacherAdmin(admin.ModelAdmin):
 
 </pre>
 以上的这些 list_per_page, list_display ,都是每一个类中特有的，你不需要完全记住，但是你要知道这些能做修改就行了。
+
+# 想起来，很有必要说说 基于类的通用列表视图。
+## 通常情况下，我们用函数去和数据库打交道也就足够了，也就是render()渲染的东西吧，然后Django给我们更好的实践就是使用类的通用列表视图。
+<br>
