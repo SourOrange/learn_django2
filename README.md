@@ -322,3 +322,146 @@ class TeacherAdmin(admin.ModelAdmin):
 # 想起来，很有必要说说 基于类的通用列表视图。
 ## 通常情况下，我们用函数去和数据库打交道也就足够了，也就是render()渲染的东西吧，然后Django给我们更好的实践就是使用类的通用列表视图。
 <br>
+<pre>
+# models.py
+from django.db import models
+
+class Publisher(models.Model):
+    name = models.CharField(max_length=30)
+    address = models.CharField(max_length=50)
+    city = models.CharField(max_length=60)
+    state_province = models.CharField(max_length=30)
+    country = models.CharField(max_length=50)
+    website = models.URLField()
+
+    class Meta:
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
+
+class Author(models.Model):
+    salutation = models.CharField(max_length=10)
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    headshot = models.ImageField(upload_to='author_headshots')
+
+    def __str__(self):
+        return self.name
+
+class Book(models.Model):
+    title = models.CharField(max_length=100)
+    authors = models.ManyToManyField('Author')
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
+    publication_date = models.DateField()
+</pre>
+这是官网中的一个介绍类的通用列表视图的模型，然后在响应的views中，我们来看看吧。
+<pre>
+# views.py
+from django.views.generic import ListView
+from books.models import Publisher
+
+class PublisherList(ListView):
+    model = Publisher
+</pre>
+你的urls中的 url_patterns需要这么配置，path('publishers/', PublisherList.as_view()), 对，就是这么做，django默认会在你的app_name/templates/app_name/publisher_list.html,会查找这个文件，是的，是默认的，来看看你的模板大概是如下：
+<pre>
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Publishers</h2>
+    <ul>
+        {% for publisher in object_list %}
+            <li>{{ publisher.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+</pre>
+默认 object_list,等同于 Publisher.objects.all(),这是当你指定 Model = Publisher 的时候，自动生成的一个属性，不过，django也知道
+如果只是 object_list 那么可读性会很差，所以，当我们指定了 model 后，默认也有一个 publisher_list 的属性，和object_list 的值是一样的，
+如果你还不满足这个名字，那么可以通过一个变量自定义，也就是 context_object_name = "my_favaour_publishers", 这个就是你自定义的。那么
+它应该像是如下的:
+<pre>
+class PublisherList(ListView):
+    model = Publisher
+    context_object_name = 'my_favorite_publishers'
+</pre>
+通常您只需要在通用视图提供的信息之外提供一些额外的信息。例如，考虑在每个出版商的详细页面上显示所有图书的列表。DetailView通用视图为上下文提供发布者，但是我们如何在该模板中获得额外的信息呢?答案就是 DetailView, 默认实现的只是把对象添加到模板中，我们可以通过 get_context_data 方法来实现更多。
+<pre>
+from django.views.generic import DetailView
+from books.models import Book, Publisher
+
+class PublisherDetail(DetailView):
+
+    model = Publisher
+
+    def get_context_data(self, **kwargs):
+        # 首先调用基本的实现以获取上下文
+        context = super().get_context_data(**kwargs)
+        # 把所有书的查询都加进来
+        context['book_list'] = Book.objects.all()
+        # 最后返回上下文
+        return context
+</pre>
+我们还可以覆盖一些方法，比如 queryset = Publisher.objects.all()， 实际上这一句等于  model = Publisher, 只不过用 queryset,还可以指定你要的信息，比如我们要按近来出版的图书排列，则可以这么做  queryset = Book.objects.order_by('-publication_date')。
+<pre>
+from django.views.generic import ListView
+from books.models import Book
+
+class BookList(ListView):
+    queryset = Book.objects.order_by('-publication_date')
+    context_object_name = 'book_list'
+    # 以上就是按照出版排列的
+    
+class AcmeBookList(ListView):
+
+    context_object_name = 'book_list'
+    # 而这个则是你要特定的出版商的列表
+    queryset = Book.objects.filter(publisher__name='ACME Publishing')
+    template_name = 'books/acme_list.html'    
+</pre>
+<br>
+另一种常见的需要是通过URL中的某个键向下过滤列表页面中给定的对象。早些时候，我们在URLconf中硬编码了出版商的名称，但是如果我们想要编写一个视图来显示某个任意出版商的所有图书，该怎么办呢?
+简单地说，ListView有一个get_queryset()方法，我们可以覆盖它。以前，它只是返回queryset属性的值，但是现在我们可以添加更多的逻辑。
+实现此功能的关键部分是，当调用基于类的视图时，各种有用的东西存储在self中;除了请求(self.request)之外，它还包括根据URLconf捕获的位置参数(self.args)和基于名称的参数(self.kwargs)。下面是我们要配置的 url。path('books/<publisher>/', PublisherBookList.as_view()),和以下的views.py
+<pre>
+# views.py
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView
+from books.models import Book, Publisher
+
+class PublisherBookList(ListView):
+
+    template_name = 'books/books_by_publisher.html'
+
+    def get_queryset(self):
+        # 把 self.kwargs['名称参数'] 存在 publisher 中，并且返回过滤出来的publisher
+        self.publisher = get_object_or_404(Publisher, name=self.kwargs['publisher'])
+        return Book.objects.filter(publisher=self.publisher)
+        
+    def get_context_data(self, **kwargs):
+        # 首先调用默认实现以获取上下文
+        context = super().get_context_data(**kwargs)
+        # 把 publisher 加进去 Add in the publisher
+        context['publisher'] = self.publisher
+        return context
+</pre>
+如上所见，只要你的逻辑通，那么实现起来不难，我们还可以使用 self.request.user 来筛选出用户。另外。第二个方法，是让我们可以把发布者添加到上下文中，以便在模板中使用。最后，我们再来想想，假设作者模型中，有最后一次访问这个属性，我们要怎么实现它呢。在原来的 models中，Author模型，添加一个last_accessed = models.DateTimeField()，这里作为例子而已，你需要自己去迁移数据库。<br>
+当然，通用的DetailView类不知道这个字段的任何信息，但是我们可以很容易地编写一个自定义视图来更新这个字段。
+首先，我们需要在URLconf中添加一个author detail位来指向自定义视图:urlpatterns = [
+    #...
+    path('authors/<int:pk>/', AuthorDetailView.as_view(), name='author-detail'),
+].
+然后我们会写我们的新视图——get_object是检索对象的方法——所以我们简单地覆盖它并包装调用:
+<pre>
+class AuthorDetailView(DetailView):
+
+    queryset = Author.objects.all()
+
+    def get_object(self):
+        obj = super().get_object()
+        # 记录最近一次的访问
+        obj.last_accessed = timezone.now()
+        obj.save()
+        return obj
+</pre>
