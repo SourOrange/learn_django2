@@ -465,3 +465,20 @@ class AuthorDetailView(DetailView):
         obj.save()
         return obj
 </pre>
+
+## 关于测试密码重置邮箱的一点建议，如果你要测试，可以在 settings.py 中加入以下这句
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+<br>
+然后当你的相关的那几个密码重置的和设置的 Html 做好之后，你可以测试，点击后，你课可以在你的命令行中，看到django给你发送的密码重置信息以及连接如下:
+<pre>
+Content-Transfer-Encoding: 8bit
+Subject: =?utf-8?b?6YeN572uIDEyNy4wLjAuMTo4MDAwIOeahOWvhueggQ==?=
+From: webmaster@localhost
+To: omg@good.com
+Date: Sat, 23 Feb 2019 13:21:37 -0000
+Message-ID: <155092809733.8004.4319565233985817575@2013-20180522ZB>
+
+重置邮件密码omg@good.com ,请按以下链接:
+http://127.0.0.1:8000/accounts/reset/Mg/543-8b443fb511c980ae9971/
+</pre>
+这里，我用了 omg@good.com 这个邮箱，也就是我的用户名的名称，不是超级用户，是一个没有什么权限的用户而已。
